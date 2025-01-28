@@ -1,0 +1,16 @@
+# Python cache files
+__pycache__/
+*.pyc
+
+# Virtual environment
+myenv/
+
+# Dataset files
+Dataset/
+neural/Dataset/
+
+# Log files
+*.log
+
+# Jupyter Notebook checkpoints
+*.ipynb_checkpoints
