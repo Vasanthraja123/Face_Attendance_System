@@ -21,7 +21,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 ENTRY_LOG_FILE = "entry_log.xlsx"
 EXIT_LOG_FILE = "exit_log.xlsx"
-CNN_MODEL_PATH = "cnn_model_4_classes.h5"
+CNN_MODEL_PATH = "cnn_model_4_classes (crop).h5"
 
 # Class mapping
 KNOWN_FACES = {

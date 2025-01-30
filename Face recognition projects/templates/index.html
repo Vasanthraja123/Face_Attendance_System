@@ -28,7 +28,7 @@
         h1 {
             font-size: 2.2rem;
             margin-bottom: 20px;
-            color: rgba(11, 236, 236, 0.6);
+            color: rgb(11, 228, 236);
             font-weight: 500;
             letter-spacing: 1px;
             text-align: center;
@@ -269,16 +269,23 @@
         let exitLogs = [];
 
         async function startCamera() {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            videoElement.srcObject = stream;
-            videoElement.style.display = 'block';
-            placeholderImage.style.display = 'none';
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+                videoElement.style.display = 'block';
+                placeholderImage.style.display = 'none';
+            } catch (error) {
+                messageDiv.textContent = 'Failed to start camera. Please check your camera permissions.';
+                messageDiv.classList.add('error');
+                stopCamera(); // Stop camera if there's an error starting it
+            }
         }
 
         function stopCamera() {
             if (stream) {
                 let tracks = stream.getTracks();
                 tracks.forEach(track => track.stop());
+                stream = null;
             }
             videoElement.style.display = 'none';
             placeholderImage.style.display = 'block';
@@ -290,6 +297,7 @@
             canvas.height = videoElement.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            stopCamera(); // Stop camera after capturing image
             return canvas.toDataURL('image/jpeg');
         }
 
@@ -308,6 +316,7 @@
                 if (!response.ok) {
                     messageDiv.textContent = `Error: Unable to process request (Status Code: ${response.status}). Please try again later.`;
                     messageDiv.classList.add('error');
+                    stopCamera(); // Stop camera on error
                     console.error(`Error: Received status code ${response.status}`);
                     return;
                 }
@@ -317,6 +326,7 @@
             } catch (error) {
                 messageDiv.textContent = 'A network error occurred. Please check your connection and try again.';
                 messageDiv.classList.add('error');
+                stopCamera(); // Stop camera on network error
                 console.error('Network or API error:', error);
             }
         }
@@ -325,6 +335,7 @@
             if (data.error) {
                 messageDiv.textContent = `Error: ${data.error}`;
                 messageDiv.classList.add('error');
+                stopCamera(); // Stop camera on recognition error
                 return;
             }
 
@@ -342,15 +353,19 @@
                     capturedImage.src = data.image;
                     capturedImage.style.display = 'block';
                 }
+                stopCamera(); // Stop camera after successful recognition
             } else if (data.message.includes('No face detected')) {
                 messageDiv.textContent = 'No face detected. Please ensure your face is clearly visible and try again.';
                 messageDiv.classList.add('error');
+                stopCamera(); // Stop camera when no face is detected
             } else {
                 messageDiv.textContent = data.message;
                 messageDiv.classList.add('info');
+                stopCamera(); // Stop camera after handling response
             }
         }
 
+        // Rest of the code remains unchanged
         function logAttendance(person, action) {
             const log = { person, time: new Date().toLocaleString() };
             if (action === 'enter') {
